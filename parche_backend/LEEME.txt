@@ -1,0 +1,8 @@
+Parche opcional del backend (v1/controllers/usuarios.controllers.js)
+
+Reemplazar el archivo del backend por este. Hace que PATCH /v1/usuarios/plan devuelva
+ademas un token nuevo con plan "premium". El frontend lo guarda automaticamente.
+Sin el parche todo funciona igual, pero al recargar la pagina (F5) el plan vuelve a
+mostrarse como "plus" hasta volver a iniciar sesion (el limite real lo valida el servidor).
+
+Despues: git add . / git commit -m "cambiarPlan devuelve token nuevo" / git push

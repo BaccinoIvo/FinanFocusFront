@@ -13,6 +13,11 @@ const extraerMensaje = (datos, status) => {
   return "Ocurrió un error inesperado";
 };
 
+// Callback que registra el store: si el servidor responde 401 con un token enviado
+// (vencido o inválido), se cierra la sesión automáticamente.
+let alNoAutorizado = null;
+export const setAlNoAutorizado = (fn) => { alNoAutorizado = fn; };
+
 export class ErrorApi extends Error {
   constructor(mensaje, status) {
     super(mensaje);
@@ -39,6 +44,9 @@ export const api = async (ruta, { metodo = "GET", body, formData } = {}) => {
   }
 
   const datos = await respuesta.json().catch(() => null);
-  if (!respuesta.ok) throw new ErrorApi(extraerMensaje(datos, respuesta.status), respuesta.status);
+  if (!respuesta.ok) {
+    if (respuesta.status === 401 && token && alNoAutorizado) alNoAutorizado();
+    throw new ErrorApi(extraerMensaje(datos, respuesta.status), respuesta.status);
+  }
   return datos;
 };

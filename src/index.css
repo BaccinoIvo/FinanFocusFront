@@ -47,3 +47,70 @@ input:focus, select:focus { outline: 2px solid var(--oro-osc); border-color: var
 .chip { border: 1px solid var(--oro-osc); color: var(--oro); border-radius: 999px; padding: .1rem .6rem;
   font-size: .75rem; text-transform: uppercase; letter-spacing: .5px; }
 .contenido { max-width: 1100px; margin: 0 auto; padding: 1.25rem 1rem; }
+
+/* ---- Navegación ---- */
+.nav-links { display: flex; gap: .25rem; flex-wrap: wrap; }
+.enlace { color: var(--suave); text-decoration: none; padding: .4rem .75rem; border-radius: 8px; }
+.enlace:hover { color: var(--texto); background: #1f1f24; }
+.enlace.activo { color: var(--oro); background: #1d1a10; }
+
+/* ---- Estructura ---- */
+h2 { margin: 0 0 .75rem; font-size: 1.1rem; }
+.encabezado { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.encabezado .btn { margin: 0; }
+.tarjeta { margin-bottom: 1rem; }
+.grid-dos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+.grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .75rem; }
+.col-completa { grid-column: 1 / -1; }
+.fila-form { display: flex; gap: .75rem; align-items: flex-start; flex-wrap: wrap; }
+.fila-form .crece { flex: 1 1 200px; }
+.fila-form .acciones { margin-top: 1.55rem; }
+.vacio { text-align: center; color: var(--suave); padding: 2rem 0; }
+
+/* ---- Listas de movimientos y categorías ---- */
+.lista { list-style: none; padding: 0; margin: 1rem 0; display: grid; gap: .75rem; }
+.mov, .cat { background: var(--panel); border: 1px solid var(--borde); border-radius: 12px; padding: 1rem; }
+.mov.editando, .cat.editando { border-color: var(--oro-osc); }
+.mov-fila, .cat-fila { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.mov-info { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.mov-monto { display: flex; flex-direction: column; align-items: flex-end; font-variant-numeric: tabular-nums; }
+.mov-monto > span { font-size: 1.15rem; font-weight: 700; }
+.mov-desc { margin: .5rem 0 0; color: var(--suave); }
+.ingreso { color: #4ade80; }
+.egreso { color: #f87171; }
+.suave { color: var(--suave); }
+small.suave { font-size: .8rem; }
+.comprobantes { display: flex; gap: .75rem; flex-wrap: wrap; margin: .5rem 0 0; font-size: .9rem; }
+
+.tag { font-size: .72rem; padding: .1rem .55rem; border-radius: 999px; border: 1px solid var(--borde); text-transform: uppercase; letter-spacing: .4px; }
+.tag-ingreso { color: #4ade80; border-color: #1f5a37; }
+.tag-egreso { color: #f87171; border-color: #6b2a2a; }
+.tag-neutro { color: var(--suave); }
+
+.acciones { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin-top: .75rem; }
+.acciones .btn { margin: 0; }
+.btn-peligro { background: #b32d2d; color: #fff; }
+.btn-peligro:hover:not(:disabled) { background: #d23a3a; }
+.btn-borrar:hover:not(:disabled) { border-color: #6b2a2a; color: #f87171; }
+
+.check { display: flex; align-items: center; gap: .5rem; margin-top: .75rem; color: var(--texto); font-size: .95rem; }
+.check input { width: auto; }
+.opcionales { margin-top: .75rem; }
+.opcionales summary { cursor: pointer; color: var(--suave); font-size: .9rem; margin-bottom: .5rem; }
+.aviso { background: #2a2210; border: 1px solid var(--oro-osc); color: #f0d77a; padding: .6rem .8rem; border-radius: 8px; font-size: .9rem; }
+
+/* ---- Informe de uso ---- */
+.numero-grande { font-size: 2.6rem; font-weight: 700; margin: 0; color: var(--oro); }
+.barra { height: 10px; background: #0f0f12; border: 1px solid var(--borde); border-radius: 999px; overflow: hidden; margin: .5rem 0; }
+.barra-relleno { height: 100%; background: var(--oro); transition: width .3s; }
+.barra-relleno.lleno { background: #f87171; }
+.beneficios { padding-left: 1.1rem; color: var(--suave); }
+
+.paginacion { display: flex; justify-content: center; align-items: center; gap: 1rem; margin: 1rem 0; }
+.paginacion .btn { margin: 0; }
+.filtros .btn { margin-top: .75rem; }
+
+@media (max-width: 600px) {
+  .mov-monto { align-items: flex-start; }
+  .navbar-der { width: 100%; justify-content: space-between; }
+}

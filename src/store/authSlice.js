@@ -52,6 +52,11 @@ const authSlice = createSlice({
     planActualizado: (state, action) => {
       if (state.usuario) state.usuario.plan = action.payload;
     },
+    // Reemplaza el token por uno nuevo (por ejemplo, tras cambiar de plan).
+    tokenActualizado: (state, action) => {
+      state.token = action.payload;
+      state.usuario = usuarioDesdeToken(action.payload);
+    },
   },
   extraReducers: (builder) => {
     const pendiente = (state) => { state.cargando = true; state.error = null; };
@@ -67,5 +72,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, limpiarError, planActualizado } = authSlice.actions;
+export const { logout, limpiarError, planActualizado, tokenActualizado } = authSlice.actions;
 export default authSlice.reducer;
