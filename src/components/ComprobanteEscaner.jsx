@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { dibujarPrimeraPagina } from "../utils/pdf";
 
 // Etapas que se muestran mientras la IA lee el comprobante. Los tiempos son una guía:
 // la lectura real tarda entre 3 y 15 segundos según la carga del servicio.
@@ -15,6 +16,25 @@ const ComprobanteEscaner = ({ archivo, leyendo, segundos }) => {
   const url = useMemo(() => (esImagen ? URL.createObjectURL(archivo) : null), [archivo, esImagen]);
   useEffect(() => () => { if (url) URL.revokeObjectURL(url); }, [url]);
 
+  // PDF: se dibuja la primera página real. pdf.js es pesado, por eso se descarga solo al subir un PDF.
+  const esPdf = archivo.type === "application/pdf";
+  const canvas = useRef(null);
+  const [falloPdf, setFalloPdf] = useState(false);
+  useEffect(() => {
+    if (!esPdf) return undefined;
+    let cancelado = false;
+    (async () => {
+      try {
+        const ok = await dibujarPrimeraPagina(archivo, canvas.current, 240 * Math.min(window.devicePixelRatio || 1, 2), () => cancelado || !canvas.current);
+        if (!cancelado) setFalloPdf(!ok);
+      } catch (e) {
+        console.warn("Miniatura de PDF no disponible:", e);
+        if (!cancelado) setFalloPdf(true); // PDF protegido o dañado: se muestra la hoja genérica
+      }
+    })();
+    return () => { cancelado = true; };
+  }, [archivo, esPdf]);
+
   const etapaActual = ETAPAS.reduce((acc, e, i) => (segundos >= e.desde ? i : acc), 0);
   const extension = (archivo.name.split(".").pop() ?? "").slice(0, 4).toUpperCase();
 
@@ -23,6 +43,8 @@ const ComprobanteEscaner = ({ archivo, leyendo, segundos }) => {
       <div className={`escaner-doc${leyendo ? " escaneando" : ""}`} aria-hidden="true">
         {esImagen && url ? (
           <img src={url} alt="" />
+        ) : esPdf && !falloPdf ? (
+          <canvas ref={canvas} />
         ) : (
           <div className="escaner-hoja">
             <span className="escaner-ext">{extension}</span>

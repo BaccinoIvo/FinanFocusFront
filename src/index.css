@@ -230,8 +230,8 @@ input.campo-ia, select.campo-ia { border-color: #3fae6a; background: #0c1a12; bo
 
 /* ---- Miniatura del comprobante con línea de escáner ---- */
 .escaner-bloque { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: .75rem; }
-.escaner-doc { position: relative; width: 120px; height: 150px; border-radius: 10px; overflow: hidden; border: 1px solid var(--borde, #2a2a2a); background: #141414; flex: none; }
-.escaner-doc img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.escaner-doc { position: relative; width: 150px; min-height: 150px; max-height: 220px; border-radius: 10px; overflow: hidden; border: 1px solid var(--borde, #2a2a2a); background: #141414; flex: none; }
+.escaner-doc img, .escaner-doc canvas { width: 100%; height: 100%; max-height: 220px; object-fit: contain; display: block; background: #fff; }
 .escaner-doc.escaneando { box-shadow: 0 0 0 1px var(--oro), 0 0 22px rgba(217, 164, 91, .35); }
 .escaner-hoja { height: 100%; padding: .7rem .6rem; display: flex; flex-direction: column; gap: .45rem; background: #f3efe4; }
 .escaner-hoja i { display: block; height: 6px; border-radius: 3px; background: #c9c3b0; }

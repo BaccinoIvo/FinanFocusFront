@@ -10,6 +10,7 @@ export const valoresVacios = () => ({
   esExportacionServicio: false,
   numeroComprobante: "",
   rutEmisor: "",
+  tipoCfe: "",
   montoIva: "",
 });
 
@@ -24,5 +25,6 @@ export const valoresDesdeMovimiento = (m) => ({
   esExportacionServicio: !!m.esExportacionServicio,
   numeroComprobante: m.numeroComprobante ?? "",
   rutEmisor: m.rutEmisor ?? "",
+  tipoCfe: m.tipoCfe ?? "",
   montoIva: m.montoIva ?? "",
 });

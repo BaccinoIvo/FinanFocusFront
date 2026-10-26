@@ -51,3 +51,4 @@ Marca en `public/brand/`. Hanken Grotesk para textos y Spline Sans Mono para cif
 - **Pantallas de error**: página 404 y un `ErrorBoundary` que evita la pantalla en blanco.
 - **Rendimiento**: pantallas con `React.lazy`; el gráfico (Recharts) se descarga solo al abrir el inicio. Lighthouse: accesibilidad 100, rendimiento 94–97, buenas prácticas 96, SEO 92.
 - **Accesibilidad**: enlace "Saltar al contenido", etiquetas asociadas a cada campo, título distinto por pantalla, respeto de `prefers-reduced-motion`.
+- **Comprobantes CFE**: la IA lee también el tipo (e-Ticket, e-Factura...). Además el navegador busca el código QR de la DGI (`jsqr`; en PDF, sobre la primera página dibujada con `pdf.js`) y completa RUT, serie/número y fecha; solo acepta QR que apunten a `dgi.gub.uy`. Si la IA falla, el QR igual completa esos datos.

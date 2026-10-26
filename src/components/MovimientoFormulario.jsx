@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { extraerComprobante } from "../api/comprobantes";
 import ComprobanteEscaner from "./ComprobanteEscaner";
 import { comprimirImagen } from "../utils/imagen";
+import { leerQrDeArchivo } from "../utils/qrCfe";
 import { MAX_ARCHIVO_MB, MONEDAS, TIPOS_ARCHIVO, TIPOS_LEIBLES_IA } from "../utils/constantes";
 import { valoresVacios } from "../utils/movimientoValores";
 
@@ -80,7 +81,8 @@ const MovimientoFormulario = ({ valoresIniciales, onGuardar, onCancelar, textoBo
     if (datos.numeroComprobante) poner("numeroComprobante", String(datos.numeroComprobante));
     if (datos.rutEmisor) poner("rutEmisor", String(datos.rutEmisor));
     if (typeof datos.montoIva === "number") poner("montoIva", String(datos.montoIva));
-    if (datos.numeroComprobante || datos.rutEmisor || typeof datos.montoIva === "number") setOpcionalesAbierto(true);
+    if (datos.tipoCfe) poner("tipoCfe", String(datos.tipoCfe));
+    if (datos.numeroComprobante || datos.rutEmisor || datos.tipoCfe || typeof datos.montoIva === "number") setOpcionalesAbierto(true);
     setCamposIA(completados);
     return completados.length;
   };
@@ -92,12 +94,33 @@ const MovimientoFormulario = ({ valoresIniciales, onGuardar, onCancelar, textoBo
     setSegundos(0);
     const reloj = setInterval(() => setSegundos((n) => n + 1), 1000);
     try {
-      const r = await extraerComprobante(await comprimirImagen(archivo));
-      if (r.ai_processed && r.datosExtraidos) {
-        const cantidad = aplicarDatos(r.datosExtraidos);
-        setAvisoIA(cantidad > 0
-          ? { tipo: "ok", texto: `La IA completó ${cantidad} ${cantidad === 1 ? "campo" : "campos"} (resaltados en verde). Revisalos y elegí la categoría antes de guardar.` }
-          : { tipo: "manual", texto: "La IA no encontró datos legibles en el comprobante. Completá los datos a mano." });
+      // El QR de la DGI se lee en el navegador, en paralelo con la IA: es más confiable que leer el texto
+      // y sirve de respaldo si el servicio de IA está ocupado.
+      const [lecturaIA, lecturaQr] = await Promise.allSettled([extraerComprobante(await comprimirImagen(archivo)), leerQrDeArchivo(archivo)]);
+      const r = lecturaIA.status === "fulfilled" ? lecturaIA.value : null;
+      const qr = lecturaQr.status === "fulfilled" ? lecturaQr.value : null;
+      if (!r && !qr) throw lecturaIA.reason;
+
+      const datos = r?.ai_processed && r.datosExtraidos ? { ...r.datosExtraidos } : {};
+      let avisoMonto = "";
+      if (qr) {
+        // Lo que dice el QR de la DGI manda sobre lo que lee la IA.
+        datos.rutEmisor = qr.rut;
+        if (qr.serie) datos.numeroComprobante = `${qr.serie}${qr.numero}`;
+        if (qr.fecha) datos.fecha = qr.fecha;
+        if (typeof datos.monto === "number" && datos.moneda === "UYU" && qr.monto != null && Math.abs(datos.monto - qr.monto) > 1) {
+          avisoMonto = ` Ojo: el QR indica un total de ${qr.monto} y la IA leyó ${datos.monto}; verificá el monto.`;
+        }
+      }
+      const cantidad = aplicarDatos(datos);
+      const origen = qr ? "la IA y el código QR de la DGI" : "la IA";
+      if (cantidad > 0) {
+        setAvisoIA({
+          tipo: avisoMonto ? "manual" : "ok",
+          texto: `${qr && !r?.ai_processed ? "Leímos el código QR de la DGI" : `Se completaron ${cantidad} ${cantidad === 1 ? "campo" : "campos"} con ${origen}`}${qr && !r?.ai_processed ? ` (${cantidad} ${cantidad === 1 ? "campo" : "campos"}); el monto y la categoría van a mano` : ""} (resaltados en verde). Revisalos y elegí la categoría antes de guardar.${avisoMonto}`,
+        });
+      } else if (r?.ai_processed) {
+        setAvisoIA({ tipo: "manual", texto: "La IA no encontró datos legibles en el comprobante. Completá los datos a mano." });
       } else {
         setAvisoIA({ tipo: "manual", texto: "No pudimos leer el comprobante automáticamente (el servicio de IA puede estar ocupado). Probá de nuevo en unos segundos o completá los datos a mano." });
       }
@@ -121,6 +144,7 @@ const MovimientoFormulario = ({ valoresIniciales, onGuardar, onCancelar, textoBo
       esExportacionServicio: d.tipo === "ingreso" ? !!d.esExportacionServicio : false,
       numeroComprobante: d.numeroComprobante.trim(),
       rutEmisor: d.rutEmisor.trim(),
+      tipoCfe: d.tipoCfe.trim(),
       montoIva: d.montoIva === "" ? null : Number(d.montoIva),
     };
     try {
@@ -229,6 +253,11 @@ const MovimientoFormulario = ({ valoresIniciales, onGuardar, onCancelar, textoBo
             <label htmlFor={id("numeroComprobante")}>N.º de comprobante</label>
             <input id={id("numeroComprobante")} className={claseIA("numeroComprobante")} {...register("numeroComprobante", { maxLength: { value: 50, message: "Máximo 50 caracteres" }, onChange: tocado("numeroComprobante") })} />
             {errors.numeroComprobante && <small className="error">{errors.numeroComprobante.message}</small>}
+          </div>
+          <div>
+            <label htmlFor={id("tipoCfe")}>Tipo de comprobante (CFE)</label>
+            <input id={id("tipoCfe")} className={claseIA("tipoCfe")} placeholder="e-Ticket, e-Factura..." {...register("tipoCfe", { maxLength: { value: 60, message: "Máximo 60 caracteres" }, onChange: tocado("tipoCfe") })} />
+            {errors.tipoCfe && <small className="error">{errors.tipoCfe.message}</small>}
           </div>
           <div>
             <label htmlFor={id("rutEmisor")}>RUT del emisor</label>
