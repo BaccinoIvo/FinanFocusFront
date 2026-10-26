@@ -1,14 +1,17 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import Logo from "./Logo";
 import { logout } from "../store/authSlice";
 import { cargarCategorias } from "../store/categoriasSlice";
 import { cargarUso } from "../store/usoSlice";
+import { nombrePlan } from "../utils/planes";
 
 const clase = ({ isActive }) => (isActive ? "enlace activo" : "enlace");
 
 const Layout = () => {
   const usuario = useSelector((s) => s.auth.usuario);
+  const esEstudio = usuario?.tipo === "estudio";
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -25,20 +28,24 @@ const Layout = () => {
 
   return (
     <div className="app">
+      <a href="#contenido" className="saltar">Saltar al contenido</a>
       <header className="navbar">
-        <span className="marca">Finan<b>Focus</b></span>
+        <Link to="/" className="marca" aria-label="FinanFocus, inicio"><Logo /></Link>
         <nav className="nav-links">
           <NavLink to="/" end className={clase}>Inicio</NavLink>
-          <NavLink to="/movimientos" className={clase}>Movimientos</NavLink>
+          {esEstudio
+            ? <NavLink to="/clientes" className={clase}>Clientes</NavLink>
+            : <NavLink to="/movimientos" className={clase}>Movimientos</NavLink>}
           <NavLink to="/categorias" className={clase}>Categorías</NavLink>
+          <NavLink to="/planes" className={clase}>Planes</NavLink>
         </nav>
         <div className="navbar-der">
-          <span className="chip">{usuario?.plan}</span>
-          <span className="usuario">{usuario?.nombreUsuario}</span>
+          <span className="chip">{nombrePlan(usuario?.plan)}</span>
+          <NavLink to="/perfil" className="usuario enlace-usuario" title="Mi perfil">{usuario?.nombreUsuario}</NavLink>
           <button className="btn btn-sec" onClick={cerrarSesion}>Cerrar sesión</button>
         </div>
       </header>
-      <main className="contenido">
+      <main id="contenido" className="contenido" tabIndex={-1}>
         <Outlet />
       </main>
     </div>

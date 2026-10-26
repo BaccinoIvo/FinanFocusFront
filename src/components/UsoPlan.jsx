@@ -1,35 +1,57 @@
 import { useSelector } from "react-redux";
-import { LIMITE_PLUS } from "../utils/constantes";
 
-// Informe de uso: % de los 4 movimientos para plus, cantidad total para premium.
+// Informe de uso. Usuario con tope (gratuito): % de los 4 movimientos del mes.
+// Usuario sin tope: cantidad de movimientos. Estudio: clientes sobre la capacidad de su plan.
 const UsoPlan = () => {
-  const plan = useSelector((s) => s.auth.usuario?.plan);
-  const { total, cargando, error } = useSelector((s) => s.uso);
+  const { datos, cargando, error } = useSelector((s) => s.uso);
+
+  const barra = (porcentaje, lleno) => (
+    <div className="barra" role="progressbar" aria-valuenow={porcentaje} aria-valuemin={0} aria-valuemax={100}>
+      <div className={`barra-relleno ${lleno ? "lleno" : ""}`} style={{ width: `${porcentaje}%` }} />
+    </div>
+  );
 
   return (
     <section className="tarjeta" aria-label="Informe de uso">
       <h2>Informe de uso</h2>
       {error && <p className="error">{error}</p>}
-      {total === null && !error && <p className="suave">{cargando ? "Cargando..." : ""}</p>}
+      {!datos && !error && <p className="suave">{cargando ? "Cargando..." : ""}</p>}
 
-      {total !== null && plan === "premium" && (
+      {datos?.tipo === "estudio" && (
+        datos.limiteClientes ? (() => {
+          const porcentaje = Math.min(Math.round((datos.clientes / datos.limiteClientes) * 100), 100);
+          const lleno = datos.clientes >= datos.limiteClientes;
+          return (
+            <>
+              <p className="numero-grande">{porcentaje}%</p>
+              {barra(porcentaje, lleno)}
+              <p className="suave">{datos.clientes} de {datos.limiteClientes} clientes (plan {datos.planNombre})</p>
+              {lleno && <p className="aviso">Llegaste al máximo de clientes. Pasá a un plan mayor para sumar más.</p>}
+            </>
+          );
+        })() : (
+          <>
+            <p className="numero-grande">{datos.clientes}</p>
+            <p className="suave">clientes · sin límite (plan {datos.planNombre})</p>
+          </>
+        )
+      )}
+
+      {datos && datos.tipo !== "estudio" && !datos.limite && (
         <>
-          <p className="numero-grande">{total}</p>
-          <p className="suave">movimientos registrados · sin límite</p>
+          <p className="numero-grande">{datos.total}</p>
+          <p className="suave">movimientos registrados · sin límite (plan {datos.planNombre})</p>
         </>
       )}
 
-      {total !== null && plan !== "premium" && (() => {
-        const porcentaje = Math.min(Math.round((total / LIMITE_PLUS) * 100), 100);
-        const lleno = total >= LIMITE_PLUS;
+      {datos && datos.tipo !== "estudio" && datos.limite && (() => {
+        const lleno = datos.usados >= datos.limite;
         return (
           <>
-            <p className="numero-grande">{porcentaje}%</p>
-            <div className="barra" role="progressbar" aria-valuenow={porcentaje} aria-valuemin={0} aria-valuemax={100}>
-              <div className={`barra-relleno ${lleno ? "lleno" : ""}`} style={{ width: `${porcentaje}%` }} />
-            </div>
-            <p className="suave">{Math.min(total, LIMITE_PLUS)} de {LIMITE_PLUS} movimientos usados (plan plus)</p>
-            {lleno && <p className="aviso">Alcanzaste el límite. Pasá a premium para seguir registrando.</p>}
+            <p className="numero-grande">{datos.porcentaje}%</p>
+            {barra(datos.porcentaje, lleno)}
+            <p className="suave">{Math.min(datos.usados, datos.limite)} de {datos.limite} movimientos usados este mes (plan {datos.planNombre})</p>
+            {lleno && <p className="aviso">Alcanzaste el límite del mes. Cambiá de plan para seguir registrando.</p>}
           </>
         );
       })()}

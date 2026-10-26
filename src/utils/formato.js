@@ -7,3 +7,6 @@ export const fechaCorta = (f) =>
 
 const formatoNumero = new Intl.NumberFormat("es-UY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 export const formatoMonto = (n) => formatoNumero.format(n);
+
+// Los perfiles sombra llevan un sufijo hexadecimal para ser únicos: no se muestra.
+export const nombreVisible = (c) => c.nombreUsuario.replace(/\.[0-9a-f]{6}$/, "");

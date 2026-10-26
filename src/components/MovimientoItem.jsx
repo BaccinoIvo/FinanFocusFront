@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { actualizarMovimiento, eliminarMovimiento, subirComprobante } from "../store/movimientosSlice";
+import { cargarUso } from "../store/usoSlice";
 import { MAX_ARCHIVO_MB, TIPOS_ARCHIVO } from "../utils/constantes";
 import { fechaCorta, formatoMonto } from "../utils/formato";
 import { valoresDesdeMovimiento } from "../utils/movimientoValores";
@@ -23,6 +24,7 @@ const MovimientoItem = ({ movimiento: m }) => {
     setError(null);
     try {
       await dispatch(eliminarMovimiento(m._id)).unwrap();
+      dispatch(cargarUso()); // el tope mensual se calcula en el servidor
     } catch (e) {
       setError(e);
       setConfirmando(false);
@@ -36,7 +38,7 @@ const MovimientoItem = ({ movimiento: m }) => {
     setError(null);
     // Validación en el frontend para no mandar al servidor lo que va a rechazar.
     if (!TIPOS_ARCHIVO.includes(archivo.type)) {
-      setError("Formato no permitido. Usá JPG, PNG, WEBP o PDF.");
+      setError("Formato no permitido. Usá JPG, PNG, WEBP, PDF o Word.");
       return;
     }
     if (archivo.size > MAX_ARCHIVO_MB * 1024 * 1024) {

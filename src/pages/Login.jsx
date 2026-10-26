@@ -2,11 +2,12 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import Logo from "../components/Logo";
 import { limpiarError, login } from "../store/authSlice";
 
 const Login = () => {
   const dispatch = useDispatch();
-  const { cargando, error } = useSelector((s) => s.auth);
+  const { cargando, error, vencida } = useSelector((s) => s.auth);
   // mode "onChange": isValid se recalcula en cada tecla, así el botón reacciona al instante.
   const { register, handleSubmit, formState: { isValid } } = useForm({
     mode: "onChange",
@@ -20,8 +21,9 @@ const Login = () => {
   return (
     <div className="auth-fondo">
       <form className="tarjeta auth-tarjeta" onSubmit={handleSubmit(onSubmit)} noValidate>
-        <h1 className="marca grande">Finan<b>Focus</b></h1>
+        <h1 className="marca grande"><Link to="/" aria-label="FinanFocus, volver a la portada"><Logo grande /></Link></h1>
         <p className="suave">Ingresá a tu cuenta</p>
+        {vencida && <p className="aviso" role="status">Tu sesión venció. Iniciá sesión de nuevo para seguir.</p>}
 
         <label htmlFor="nombreUsuario">Usuario</label>
         <input id="nombreUsuario" autoComplete="username"

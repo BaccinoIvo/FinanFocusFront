@@ -4,16 +4,15 @@ import FiltrosMovimientos from "../components/FiltrosMovimientos";
 import MovimientoFormulario from "../components/MovimientoFormulario";
 import MovimientoItem from "../components/MovimientoItem";
 import Paginacion from "../components/Paginacion";
-import { cargarMovimientos, crearMovimiento, setPage } from "../store/movimientosSlice";
-import { LIMITE_PLUS } from "../utils/constantes";
+import { cargarMovimientos, crearMovimiento, setPage, subirComprobante } from "../store/movimientosSlice";
 import { valoresVacios } from "../utils/movimientoValores";
 
 const Movimientos = () => {
   const dispatch = useDispatch();
   const { items, paginacion, filtros, page, cargando, error } = useSelector((s) => s.movimientos);
-  const plan = useSelector((s) => s.auth.usuario?.plan);
-  const totalUso = useSelector((s) => s.uso.total);
+  const uso = useSelector((s) => s.uso.datos);
   const [mostrarAlta, setMostrarAlta] = useState(false);
+  const [aviso, setAviso] = useState(null);
 
   const rangoInvalido = filtros.desde && filtros.hasta && filtros.desde > filtros.hasta;
 
@@ -22,11 +21,21 @@ const Movimientos = () => {
     if (!rangoInvalido) dispatch(cargarMovimientos());
   }, [dispatch, filtros, page, rangoInvalido]);
 
-  // Plan plus: al llegar a 4 no se permite el alta (el backend también lo valida).
-  const limiteAlcanzado = plan !== "premium" && totalUso !== null && totalUso >= LIMITE_PLUS;
+  // Plan gratuito: al llegar al tope mensual no se permite el alta (el backend también lo valida).
+  const limiteAlcanzado = Boolean(uso?.limite) && uso.usados >= uso.limite;
 
-  const crear = async (datos) => {
-    await dispatch(crearMovimiento(datos)).unwrap();
+  // Primero se crea el movimiento; después, si hay archivo, se adjunta. Si falla solo el adjunto,
+  // el movimiento ya existe: se avisa y no se vuelve a pedir el alta (evita duplicados).
+  const crear = async (datos, archivo) => {
+    setAviso(null);
+    const creado = await dispatch(crearMovimiento(datos)).unwrap();
+    if (archivo) {
+      try {
+        await dispatch(subirComprobante({ id: creado._id, archivo })).unwrap();
+      } catch (e) {
+        setAviso(`El movimiento se creó, pero no se pudo adjuntar el comprobante (${e}). Podés adjuntarlo desde su tarjeta.`);
+      }
+    }
     setMostrarAlta(false);
   };
 
@@ -46,11 +55,14 @@ const Movimientos = () => {
             valoresIniciales={valoresVacios()}
             onGuardar={crear}
             textoBoton="Agregar movimiento"
+            conComprobante
             bloqueado={limiteAlcanzado}
-            mensajeBloqueo={`Alcanzaste el límite de ${LIMITE_PLUS} movimientos del plan plus. Pasá a premium desde el inicio para agregar más.`}
+            mensajeBloqueo={`Alcanzaste el límite de ${uso?.limite} movimientos por mes del plan ${uso?.planNombre}. Cambiá de plan en la sección Planes para agregar más.`}
           />
         </section>
       )}
+
+      {aviso && <p className="aviso" role="status">{aviso}</p>}
 
       <FiltrosMovimientos />
 

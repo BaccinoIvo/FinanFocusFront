@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
 
 // Alta y edición de categorías. onGuardar devuelve una promesa; si rechaza se muestra el error.
 const CategoriaFormulario = ({ valoresIniciales = { nombre: "", tipo: "egreso" }, onGuardar, onCancelar, textoBoton }) => {
+  const uid = useId();
   const [errorApi, setErrorApi] = useState(null);
   const { register, handleSubmit, reset, formState: { errors, isValid, isSubmitting } } = useForm({
     mode: "onChange",
@@ -23,8 +24,8 @@ const CategoriaFormulario = ({ valoresIniciales = { nombre: "", tipo: "egreso" }
     <form className="form-cat" onSubmit={handleSubmit(enviar)} noValidate>
       <div className="fila-form">
         <div className="crece">
-          <label>Nombre</label>
-          <input maxLength={40}
+          <label htmlFor={`${uid}-nombre`}>Nombre</label>
+          <input id={`${uid}-nombre`} maxLength={40}
             {...register("nombre", {
               required: "El nombre es obligatorio",
               validate: (v) => v.trim().length >= 2 || "Mínimo 2 caracteres",
@@ -33,8 +34,8 @@ const CategoriaFormulario = ({ valoresIniciales = { nombre: "", tipo: "egreso" }
           {errors.nombre && <small className="error">{errors.nombre.message}</small>}
         </div>
         <div>
-          <label>Tipo</label>
-          <select {...register("tipo", { required: true })}>
+          <label htmlFor={`${uid}-tipo`}>Tipo</label>
+          <select id={`${uid}-tipo`} {...register("tipo", { required: true })}>
             <option value="egreso">Egreso</option>
             <option value="ingreso">Ingreso</option>
           </select>

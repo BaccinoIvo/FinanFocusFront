@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
+import Logo from "../components/Logo";
 import { limpiarError, registrar } from "../store/authSlice";
 
 // Mismas reglas que el Joi del backend (auth.validators.js) para no sobrecargar el servidor.
@@ -26,22 +27,31 @@ const reglas = {
 const Registro = () => {
   const dispatch = useDispatch();
   const { cargando, error } = useSelector((s) => s.auth);
+  // Si se llega desde la landing, el email que escribió el usuario viene en el state de la ruta.
+  const emailInicial = useLocation().state?.email ?? "";
+  // /registro?tipo=estudio (desde la portada) deja marcada la opción de contador o estudio.
+  const tipoInicial = useSearchParams()[0].get("tipo") === "estudio" ? "estudio" : "usuario";
   const { register, handleSubmit, getValues, formState: { errors, isValid } } = useForm({
     mode: "onChange",
-    defaultValues: { nombreUsuario: "", email: "", password: "", repetir: "" },
+    defaultValues: { tipo: tipoInicial, nombreUsuario: "", email: emailInicial, password: "", repetir: "" },
   });
 
   useEffect(() => () => { dispatch(limpiarError()); }, [dispatch]);
 
   // El backend no recibe "repetir": solo se usa para validar en el frontend.
-  const onSubmit = ({ nombreUsuario, email, password }) =>
-    dispatch(registrar({ nombreUsuario: nombreUsuario.trim(), email: email.trim(), password }));
+  const onSubmit = ({ tipo, nombreUsuario, email, password }) =>
+    dispatch(registrar({ tipo, nombreUsuario: nombreUsuario.trim(), email: email.trim(), password }));
 
   return (
     <div className="auth-fondo">
       <form className="tarjeta auth-tarjeta" onSubmit={handleSubmit(onSubmit)} noValidate>
-        <h1 className="marca grande">Finan<b>Focus</b></h1>
+        <h1 className="marca grande"><Link to="/" aria-label="FinanFocus, volver a la portada"><Logo grande /></Link></h1>
         <p className="suave">Creá tu cuenta</p>
+
+        <div className="selector-tipo" role="radiogroup" aria-label="Tipo de cuenta">
+          <label><input type="radio" value="usuario" {...register("tipo")} />Freelancer</label>
+          <label><input type="radio" value="estudio" {...register("tipo")} />Contador o estudio</label>
+        </div>
 
         <label htmlFor="nombreUsuario">Usuario</label>
         <input id="nombreUsuario" autoComplete="username" {...register("nombreUsuario", reglas.nombreUsuario)} />

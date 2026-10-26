@@ -37,13 +37,19 @@ const authSlice = createSlice({
     usuario: tokenInicial ? usuarioDesdeToken(tokenInicial) : null,
     cargando: false,
     error: null,
+    vencida: false,
   },
   reducers: {
-    logout: (state) => {
-      borrarToken();
-      state.token = null;
-      state.usuario = null;
-      state.error = null;
+    // logout({ vencida: true }) lo dispara el aviso global de 401: se explica en la pantalla de login.
+    logout: {
+      reducer: (state, action) => {
+        borrarToken();
+        state.token = null;
+        state.usuario = null;
+        state.error = null;
+        state.vencida = Boolean(action.payload?.vencida);
+      },
+      prepare: (opciones) => ({ payload: opciones ?? {} }),
     },
     limpiarError: (state) => {
       state.error = null;
@@ -59,7 +65,7 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    const pendiente = (state) => { state.cargando = true; state.error = null; };
+    const pendiente = (state) => { state.cargando = true; state.error = null; state.vencida = false; };
     const exito = (state, action) => {
       state.cargando = false;
       state.token = action.payload;
