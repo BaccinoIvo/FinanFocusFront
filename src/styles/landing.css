@@ -254,6 +254,78 @@
 /* Menú fijo de la portada: acompaña al recorrer las secciones. */
 html:has(.landing) { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html:has(.landing) { scroll-behavior: auto; } }
-.landing .topbar { position: sticky; top: 0; z-index: 50; background: rgba(10, 10, 10, .88);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.landing .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50; border-bottom: 0;
+  background: linear-gradient(rgba(10, 10, 10, .55), rgba(10, 10, 10, 0));
+  transition: background .35s ease, box-shadow .35s ease; }
+.landing[data-scrolled="1"] .topbar { background: rgba(10, 10, 10, .88); box-shadow: 0 1px 0 var(--line);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 .landing section[id] { scroll-margin-top: 72px; }
+
+/* ---- Efectos de la portada ---- */
+.landing .progreso { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 70; transform-origin: 0 50%;
+  transform: scaleX(var(--scroll, 0)); background: linear-gradient(90deg, var(--gold), var(--gold-hover)); pointer-events: none; }
+
+.landing .rv { opacity: 0; transform: translateY(26px); transition: opacity .8s cubic-bezier(.2, .7, .2, 1), transform .8s cubic-bezier(.2, .7, .2, 1); transition-delay: var(--d, 0s); }
+.landing .rv.vis { opacity: 1; transform: none; }
+
+.landing .brillo { position: relative; }
+.landing .brillo::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; opacity: 0; transition: opacity .35s;
+  background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(217, 164, 91, .13), transparent 62%); }
+.landing .brillo:hover::after { opacity: 1; }
+
+/* Cotizaciones en cinta continua */
+.landing .rail .cinta { flex: 1 1 320px; min-width: 0; overflow: hidden; padding: 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+.landing .rail .cinta-pista { display: flex; width: max-content; animation: cinta 34s linear infinite; }
+.landing .rail .cinta:hover .cinta-pista { animation-play-state: paused; }
+.landing .rail .cinta-grupo { display: flex; flex: none; }
+.landing .rail .cinta-grupo > div { flex: none; padding: 18px 28px; }
+@keyframes cinta { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .landing .rail .cinta { -webkit-mask-image: none; mask-image: none; }
+  .landing .rail .cinta-pista { animation: none; flex-wrap: wrap; width: auto; }
+  .landing .rail .cinta-grupo[aria-hidden] { display: none; }
+}
+
+/* ---- Apertura: Palacio Salvo fijo con scroll ---- */
+.landing .escena { position: relative; height: 280vh; --p: 0; background: #06142e; }
+.landing .escena-pin { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; isolation: isolate; }
+.landing .escena-capa { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 57% 40%; user-select: none; -webkit-user-drag: none; }
+
+.landing .escena-frente { z-index: 2; }
+.landing .escena-titulo { position: absolute; left: 6%; right: 44%; top: 13%; margin: 0; box-sizing: border-box; text-align: left; color: #fff; z-index: 1; pointer-events: none;
+  font-weight: 700; font-size: clamp(44px, 6.4vw, 108px); line-height: .92; letter-spacing: -.035em; text-shadow: 0 4px 40px rgba(4, 16, 48, .45);
+  transform: translate(calc(var(--p) * 38vw), calc(var(--p) * -14vh)) scale(calc(1 - var(--p) * .12)); opacity: calc(1 - var(--p) * 2.4); will-change: transform, opacity; }
+
+.landing .escena-velo { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: #0a0a0a;
+  opacity: calc(var(--p) * .84 + max(0, var(--p) - .84) * 1); }
+.landing .escena-luz { position: absolute; inset: auto 0 0 0; height: 70%; z-index: 4; pointer-events: none; opacity: calc(var(--p) * .9);
+  background: radial-gradient(ellipse 70% 80% at 50% 100%, rgba(217, 164, 91, .38), transparent 70%); mix-blend-mode: screen; }
+
+.landing .escena-cta { position: absolute; left: 0; right: 0; top: 50%; z-index: 5; text-align: center; padding: 0 24px; visibility: hidden;
+  opacity: calc((var(--p) - .42) * 3); transform: translateY(calc(-50% + (1 - var(--p)) * 40px)); }
+.landing .escena[data-fase="2"] .escena-cta { visibility: visible; }
+.landing .escena-frase { margin: 18px auto 0; max-width: 760px; color: #fff; font-weight: 700; font-size: clamp(30px, 5vw, 60px); line-height: 1.05; letter-spacing: -.02em; }
+.landing .escena-botones { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+
+.landing .escena-baja { position: absolute; left: 50%; bottom: 28px; z-index: 5; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: #fff; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; opacity: calc(1 - var(--p) * 8); text-shadow: 0 1px 12px rgba(0, 0, 0, .5); }
+.landing .escena-baja i { width: 1.5px; height: 40px; background: linear-gradient(#fff, transparent); animation: baja 1.8s ease-in-out infinite; transform-origin: top; }
+@keyframes baja { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+
+@media (max-width: 720px) { .landing .escena { height: 240vh; } .landing .escena-titulo { left: 6%; right: 40%; top: 12%; text-align: left; font-size: 10.6vw; } }
+@media (prefers-reduced-motion: reduce) {
+  .landing .escena { height: auto; }
+  .landing .escena-pin { position: relative; height: min(100svh, 780px); }
+  .landing .escena-titulo { transform: none; opacity: 1; }
+  .landing .escena-velo { opacity: .55; background: linear-gradient(transparent, #0a0a0a); }
+  .landing .escena-luz { display: none; }
+  .landing .escena-cta { visibility: visible; opacity: 1; top: auto; bottom: 8%; transform: none; }
+  .landing .escena-frase { font-size: clamp(22px, 3.2vw, 36px); }
+  .landing .escena-baja { display: none; }
+}
+
+/* Viñeta de la escena: funde la foto con el negro de la marca arriba y abajo */
+.landing .escena-pin::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: linear-gradient(rgba(10, 10, 10, .55), transparent 22%, transparent 62%, rgba(10, 10, 10, .75)),
+    radial-gradient(ellipse 120% 90% at 55% 45%, transparent 55%, rgba(10, 10, 10, .45)); }

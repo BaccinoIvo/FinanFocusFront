@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../components/Logo";
+import useEfectosLanding from "../hooks/useEfectosLanding";
 import Calculadora from "../components/landing/Calculadora";
 import {
   Grabado, IconoCerrar, IconoCheck, IconoCruz, IconoGithub, IconoMenu, IconoRecibo, Ondas,
 } from "../components/landing/Iconos";
+import EscenaPalacio from "../components/landing/EscenaPalacio";
 import Precios from "../components/landing/Precios";
 import RegistroRapido from "../components/landing/RegistroRapido";
 import { LIMITE_GRATUITO, MAX_ARCHIVO_MB } from "../utils/constantes";
@@ -54,6 +56,8 @@ const PREGUNTAS = [
 
 const Landing = () => {
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const raiz = useRef(null);
+  useEfectosLanding(raiz);
   const cerrarMenu = () => setMenuAbierto(false);
   // Vuelve al principio de la página sin recargarla (la ruta "/" ya es esta misma portada).
   const irArriba = (e) => {
@@ -63,7 +67,8 @@ const Landing = () => {
   };
 
   return (
-    <div className="landing">
+    <div className="landing" ref={raiz}>
+      <div className="progreso" aria-hidden="true" />
       {/* Menú fijo: queda visible mientras se recorre la portada (solo existe sin sesión iniciada). */}
       <div className="topbar">
         <header className={`wrap nav ${menuAbierto ? "abierto" : ""}`}>
@@ -82,6 +87,9 @@ const Landing = () => {
           </button>
         </header>
       </div>
+
+      {/* ---------- Apertura con scroll ---------- */}
+      <EscenaPalacio />
 
       {/* ---------- Portada ---------- */}
       <section id="inicio" className="hero">
@@ -135,7 +143,16 @@ const Landing = () => {
         <div className="rail" aria-label="Cotizaciones de ejemplo">
           <div className="wrap">
             <div className="lbl">7 monedas · a UYU</div>
-            {COTIZACIONES.map(([m, v]) => <div key={m}><span className="k">{m}</span> {v}</div>)}
+            {/* Cinta continua: la lista va dos veces para que el bucle no tenga cortes (la copia se oculta a lectores de pantalla). */}
+            <div className="cinta">
+              <div className="cinta-pista">
+                {[0, 1].map((copia) => (
+                  <div key={copia} className="cinta-grupo" aria-hidden={copia === 1 ? "true" : undefined}>
+                    {COTIZACIONES.map(([m, v]) => <div key={m}><span className="k">{m}</span> {v}</div>)}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
