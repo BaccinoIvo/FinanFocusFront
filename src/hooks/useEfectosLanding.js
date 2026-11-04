@@ -36,7 +36,6 @@ const useEfectosLanding = (raiz) => {
       cuadro = 0;
       const total = document.documentElement.scrollHeight - window.innerHeight;
       el.style.setProperty("--scroll", total > 0 ? Math.min(1, window.scrollY / total) : 0);
-      el.setAttribute("data-scrolled", window.scrollY > 24 ? "1" : "0");
     };
     const alScroll = () => { if (!cuadro) cuadro = requestAnimationFrame(progreso); };
     window.addEventListener("scroll", alScroll, { passive: true });

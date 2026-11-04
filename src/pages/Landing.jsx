@@ -6,7 +6,7 @@ import Calculadora from "../components/landing/Calculadora";
 import {
   Grabado, IconoCerrar, IconoCheck, IconoCruz, IconoGithub, IconoMenu, IconoRecibo, Ondas,
 } from "../components/landing/Iconos";
-import EscenaPalacio from "../components/landing/EscenaPalacio";
+import EscenaVideo from "../components/landing/EscenaVideo";
 import Precios from "../components/landing/Precios";
 import RegistroRapido from "../components/landing/RegistroRapido";
 import { LIMITE_GRATUITO, MAX_ARCHIVO_MB } from "../utils/constantes";
@@ -43,8 +43,8 @@ const CLIENTES = [
   ["sofi.ilustra", "2 sin comprobante", true], ["nico.audiovisual", "12 mov. · al día"],
 ];
 const EQUIPO = [
-  { inicial: "I", nombre: "Ivo Baccino", rol: "Cofundador · Desarrollo Full Stack", github: "https://github.com/BaccinoIvo" },
-  { inicial: "L", nombre: "Leonardo Paroli", rol: "Cofundador · Desarrollo Full Stack" },
+  { inicial: "I", foto: "/equipo/ivo-baccino.webp", nombre: "Ivo Baccino", rol: "Cofundador · Desarrollo Full Stack", github: "https://github.com/BaccinoIvo" },
+  { inicial: "L", foto: "/equipo/leonardo-paroli.webp", nombre: "Leonardo Paroli", rol: "Cofundador · Desarrollo Full Stack" },
 ];
 const PREGUNTAS = [
   ["¿FinanFocus reemplaza a mi contador?", "No. Lo complementa: vos cargás y ordenás tus movimientos, y tu contador recibe todo listo. FinanFocus no da asesoramiento tributario."],
@@ -89,7 +89,7 @@ const Landing = () => {
       </div>
 
       {/* ---------- Apertura con scroll ---------- */}
-      <EscenaPalacio />
+      <EscenaVideo />
 
       {/* ---------- Portada ---------- */}
       <section id="inicio" className="hero">
@@ -233,7 +233,7 @@ const Landing = () => {
           <div className="people">
             {EQUIPO.map((p) => (
               <article key={p.inicial} className="person">
-                <div className="photo"><span className="ini">{p.inicial}</span></div>
+                <div className="photo"><img src={p.foto} alt={`Foto de ${p.nombre}`} width="400" height="400" loading="lazy" decoding="async" /></div>
                 <div className="person-body">
                   <h3>{p.nombre}</h3>
                   <p className="role">{p.rol}</p>
